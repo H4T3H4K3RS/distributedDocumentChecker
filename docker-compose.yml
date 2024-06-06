@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  pg:
+    image: postgres:13.4
+    container_name: pg
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgresuser
+      - POSTGRES_PASSWORD=passwordpostgres228
+      - POSTGRES_DB=postgresdb
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - app_net
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend
+    depends_on:
+      - pg
+    environment:
+      - MAIN_DB_USER=postgresuser
+      - MAIN_DB_PASSWORD=passwordpostgres228
+      - MAIN_DB_NAME=postgresdb
+      - MAIN_DB_PORT=5432
+      - MAIN_DB_HOST=pg
+      - LOCAL=false
+      - DEBUG=true
+      - RABBITMQ_HOST=178.154.230.202
+    ports:
+      - "8881:8080"
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    driver: bridge
